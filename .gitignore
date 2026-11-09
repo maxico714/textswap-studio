@@ -1,0 +1,12 @@
+# TextSwap Studio local data
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/sessions/
+data/fonts/google/
+data/fonts/embedded/
+data/fonts/*.ttf
+data/fonts/*.otf
+.agent-workflow/notebook_cell.py
+.agent-workflow/extract_engine.py
