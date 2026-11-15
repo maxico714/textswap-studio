@@ -1,5 +1,7 @@
 # TextSwap Studio — local web document text editor
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/maxico714/textswap-studio)
+
 A local Flask web app that turns the original Colab notebook into a page-based text editor for images, scans and PDFs. It finds text with OCR, lets you select and edit blocks, replaces text while matching the source font/colour/weight/width, and removes text without damaging the paper, watermark, logo, stamp or table lines.
 
 Everything runs on your machine by default. No cloud OCR, no paid API, no model key, no document upload to a third party. The only optional network call is an explicit font-family download from Google Fonts. An optional Docker/Render deployment is included for self-hosting; a public instance is not appropriate for confidential documents (see below).
