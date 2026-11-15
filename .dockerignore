@@ -1,0 +1,12 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+data
+tests
+.agent-workflow
+TextSwap_Studio.ipynb
+test_page.png
+test_page_replaced.png

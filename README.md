@@ -2,7 +2,7 @@
 
 A local Flask web app that turns the original Colab notebook into a page-based text editor for images, scans and PDFs. It finds text with OCR, lets you select and edit blocks, replaces text while matching the source font/colour/weight/width, and removes text without damaging the paper, watermark, logo, stamp or table lines.
 
-Everything runs on your machine. No cloud OCR, no paid API, no model key, no document upload to a third party. The only optional network call is an explicit font-family download from Google Fonts.
+Everything runs on your machine by default. No cloud OCR, no paid API, no model key, no document upload to a third party. The only optional network call is an explicit font-family download from Google Fonts. An optional Docker/Render deployment is included for self-hosting; a public instance is not appropriate for confidential documents (see below).
 
 ## What it does
 
@@ -93,6 +93,28 @@ tests/                     regression + API tests
 setup.ps1 / setup.sh       venv + dependency setup
 run.ps1 / run.sh           start the app
 ```
+
+## Deploy on Render (Docker, free plan)
+
+`Dockerfile` installs Tesseract (English, Hindi, Urdu) and metric-compatible fonts; `render.yaml` declares a free Docker web service with a `/healthz` check.
+
+1. Push this repo to GitHub.
+2. In Render: **New → Blueprint**, select the repo, apply `render.yaml` (or **New → Web Service**, runtime **Docker**, plan **Free**).
+3. The blueprint sets `TEXTSWAP_ENV=production`, `TEXTSWAP_PROXY=1`, `TEXTSWAP_HTTPS=1`, `TEXTSWAP_DATA=/tmp/textswap`, and generates `TEXTSWAP_SECRET`.
+
+Manual Docker run:
+
+```bash
+docker build -t textswap-studio .
+docker run --rm -p 10000:10000 -e PORT=10000 -e TEXTSWAP_SECRET=change-me textswap-studio
+```
+
+Operational notes:
+
+- **Single process required.** Sessions and documents are kept in memory, so the container runs one Waitress process with four threads. Do not add multiple workers without moving state to shared storage.
+- **Free plan limits.** 512 MB RAM, 0.1 CPU, spin-down after 15 idle minutes, and an ephemeral filesystem. Uploads and downloaded fonts are lost on restart/redeploy; the app's session TTL is six hours. Use small, single-page documents on the free plan.
+- **Privacy.** A public instance accepts documents from anyone with the URL and stores them temporarily on the server. Use the local app, a private Render service, or a paid instance with your own access controls for sensitive material.
+- **Request time.** OCR of large scans can approach Render's proxy timeout; keep uploads modest.
 
 ## Tests
 

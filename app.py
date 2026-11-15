@@ -8,10 +8,12 @@ import traceback
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request, send_file, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from textswap import documents, fonts
 
 ROOT = Path(__file__).resolve().parent
+PRODUCTION = os.environ.get("TEXTSWAP_ENV") == "production"
 
 
 def create_app() -> Flask:
@@ -21,7 +23,20 @@ def create_app() -> Flask:
         MAX_CONTENT_LENGTH=documents.MAX_UPLOAD + 8 * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=os.environ.get("TEXTSWAP_HTTPS") == "1",
     )
+    if os.environ.get("TEXTSWAP_PROXY") == "1":
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+    @app.after_request
+    def security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        return response
+
+    @app.get("/healthz")
+    def healthz():
+        return jsonify({"ok": True, "service": "textswap-studio"})
 
     def sid() -> str:
         current = session.get("sid")
@@ -142,6 +157,8 @@ def create_app() -> Flask:
     @app.errorhandler(Exception)
     def unhandled(exc):
         app.logger.error("Unhandled: %s\n%s", exc, traceback.format_exc())
+        if PRODUCTION:
+            return jsonify({"error": "Internal server error."}), 500
         return jsonify({"error": f"{type(exc).__name__}: {exc}"}), 500
 
     return app
@@ -152,4 +169,4 @@ app = create_app()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))
     print(f"TextSwap Studio -> http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=False, threaded=True)
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=port, debug=False, threaded=True)

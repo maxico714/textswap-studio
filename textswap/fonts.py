@@ -30,7 +30,7 @@ except Exception:  # pragma: no cover - environment dependent
     TTFont = None
 
 ROOT = Path(__file__).resolve().parents[1]
-FONT_ROOT = ROOT / "data" / "fonts"
+FONT_ROOT = Path(os.environ.get("TEXTSWAP_DATA") or (ROOT / "data")) / "fonts"
 GOOGLE_ROOT = FONT_ROOT / "google"
 EMBEDDED_ROOT = FONT_ROOT / "embedded"
 for _p in (FONT_ROOT, GOOGLE_ROOT, EMBEDDED_ROOT):

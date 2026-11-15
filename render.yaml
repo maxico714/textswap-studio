@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: textswap-studio
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: TEXTSWAP_ENV
+        value: production
+      - key: TEXTSWAP_PROXY
+        value: "1"
+      - key: TEXTSWAP_HTTPS
+        value: "1"
+      - key: TEXTSWAP_DATA
+        value: /tmp/textswap
+      - key: TEXTSWAP_SECRET
+        generateValue: true
