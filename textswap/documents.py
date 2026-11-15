@@ -22,7 +22,10 @@ import pytesseract
 from . import engine, fonts, native_pdf
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_BASE = Path(os.environ.get("TEXTSWAP_DATA") or (ROOT / "data"))
+DATA_BASE = Path(
+    os.environ.get("TEXTSWAP_DATA")
+    or ("/tmp/textswap" if os.environ.get("RENDER") else ROOT / "data")
+)
 DATA_ROOT = DATA_BASE / "sessions"
 DATA_ROOT.mkdir(parents=True, exist_ok=True)
 

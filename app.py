@@ -13,7 +13,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from textswap import documents, fonts
 
 ROOT = Path(__file__).resolve().parent
-PRODUCTION = os.environ.get("TEXTSWAP_ENV") == "production"
+ON_RENDER = bool(os.environ.get("RENDER"))
+PRODUCTION = os.environ.get("TEXTSWAP_ENV") == "production" or ON_RENDER
 
 
 def create_app() -> Flask:
@@ -23,9 +24,9 @@ def create_app() -> Flask:
         MAX_CONTENT_LENGTH=documents.MAX_UPLOAD + 8 * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        SESSION_COOKIE_SECURE=os.environ.get("TEXTSWAP_HTTPS") == "1",
+        SESSION_COOKIE_SECURE=(os.environ.get("TEXTSWAP_HTTPS") == "1") or ON_RENDER,
     )
-    if os.environ.get("TEXTSWAP_PROXY") == "1":
+    if ON_RENDER or os.environ.get("TEXTSWAP_PROXY") == "1":
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     @app.after_request
